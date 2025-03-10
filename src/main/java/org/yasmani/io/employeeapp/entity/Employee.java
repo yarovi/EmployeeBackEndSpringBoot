@@ -24,4 +24,9 @@ public class Employee {
     @Column(unique = true, nullable = false,name = "email_id")
     private String email;
 
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department parentDepartment;
+
+
 }

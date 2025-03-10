@@ -3,9 +3,11 @@ package org.yasmani.io.employeeapp.service.impl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.yasmani.io.employeeapp.dto.EmployeeDto;
+import org.yasmani.io.employeeapp.entity.Department;
 import org.yasmani.io.employeeapp.entity.Employee;
 import org.yasmani.io.employeeapp.exception.ResourceNotFoundException;
 import org.yasmani.io.employeeapp.mapper.EmployeeMapper;
+import org.yasmani.io.employeeapp.repository.DepartmentRepository;
 import org.yasmani.io.employeeapp.repository.EmployeeRepository;
 import org.yasmani.io.employeeapp.service.EmployeeService;
 
@@ -18,10 +20,18 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
 
+    private final DepartmentRepository departmentRepository;
     @Override
     public EmployeeDto createEmployee(EmployeeDto employeeDto) {
         Employee employee = EmployeeMapper.mapToEmployee(employeeDto);
+
+        Department department = departmentRepository.findById(employeeDto.getDepartmentId()).
+                orElseThrow(() -> new ResourceNotFoundException("Department is not exist with given id:"+employeeDto.getDepartmentId()));
+        employee.setParentDepartment(department);
+
         Employee saveEmployee= employeeRepository.save(employee);
+
+
         return EmployeeMapper.mapToEmployeeDto(saveEmployee);
     }
 
@@ -47,9 +57,16 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeDto updateEmployee(Long id, EmployeeDto employeeDto) {
         Employee employee = employeeRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Employee is not exist with given id:"+id));
+
         employee.setFirstName(employeeDto.getFirstName());
         employee.setLastName(employeeDto.getLastName());
         employee.setEmail(employeeDto.getEmail());
+
+
+        Department department = departmentRepository.findById(employeeDto.getDepartmentId()).
+                orElseThrow(() -> new ResourceNotFoundException("Department is not exist with given id:"+employeeDto.getDepartmentId()));
+        employee.setParentDepartment(department);
+
         Employee saveEmployee = employeeRepository.save(employee);
         return EmployeeMapper.mapToEmployeeDto(saveEmployee);
     }
